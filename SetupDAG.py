@@ -1,3 +1,4 @@
+from datetime import datetime 
 from datetime import date
 from datetime import timedelta
 import pandas as pd
@@ -11,13 +12,13 @@ def download_AAPL_data():
     start_date = date.today()
     end_date = start_date + timedelta(days=1)
     aapl_df = yf.download('AAPL', start=start_date, end=end_date, interval='1m' )
-    aapl_df.to_csv("aapl_data.csv", header=False)
+    aapl_df.to_csv('/tmp/data/' + str(start_date) + "/aapl_data.csv", header=False)
 
 def download_TSLA_data():
     start_date = date.today()
     end_date = start_date + timedelta(days=1)
     tsla_df = yf.download('TSLA', start=start_date, end=end_date, interval='1d' )
-    tsla_df.to_csv("tsla_data.csv", header=False)
+    tsla_df.to_csv('/tmp/data/' + str(start_date) + "tsla_data.csv", header=False)
 
 def query_data(*args):
     filepath = args[0]
@@ -25,7 +26,7 @@ def query_data(*args):
     timestamp = df[0]
     avg_price = (df[1]+df[2]+df[3]+df[4]+df[5])/5
     result = pd.DataFrame(data={'Timestamp':[timestamp], 'Avg Price':[avg_price]})
-    df.to_csv('History.csv', mode='a', header=False)
+    df.to_csv('/opt/airflow/dags/mini-project/History.csv', mode='a', header=False)
 
 default_args = {
     'owner': 'airflow',
@@ -35,14 +36,14 @@ default_args = {
     'email_on_retry': True,
     'retries': 2,
     'retry_delay': timedelta(minutes=5),
-    'start_date': date.today()
+    'start_date': datetime.now(),
+    'schedule_interval': '0 18 * * 1-5'
 }
 
 dag_yahoo_finance = DAG(
-'marketvol',
+dag_id='marketvol',
 default_args=default_args,
-description='A simple DAG',
-schedule_interval='0 18 * * 1-5'
+description='A simple DAG'
 )
 
 t0 = BashOperator(
@@ -66,22 +67,22 @@ t2 = PythonOperator(
 )
 
 t3 = BashOperator(
-    task_id='move_data',
-    bash_command='mv /tmp/data/$(date +%Y-%m-%d)/aapl_data.csv "C:\Users\Beatrice Tierra\Documents\Springboard\Airflow-Mini-Project\output"',
+    task_id='move_appl_data',
+    bash_command='mv /tmp/data/$(date +%Y-%m-%d)/aapl_data.csv /opt/airflow/dags/mini-project/output',
     dag=dag_yahoo_finance
 )
 
 t4 = BashOperator(
-    task_id='move_data',
-    bash_command='mv /tmp/data/$(date +%Y-%m-%d)/tsla_data.csv "C:\Users\Beatrice Tierra\Documents\Springboard\Airflow-Mini-Project\output"',
+    task_id='move_tsla_data',
+    bash_command='mv /tmp/data/$(date +%Y-%m-%d)/tsla_data.csv /opt/airflow/dags/mini-project/output',
     dag=dag_yahoo_finance
 )
 
 t5 = PythonOperator(
     task_id='query_data',
     python_callable=query_data,
-    op_args=['C:\Users\Beatrice Tierra\Documents\Springboard\Airflow-Mini-Project\output\aapl_data.csv',
-    'C:\Users\Beatrice Tierra\Documents\Springboard\Airflow-Mini-Project\output\tsla_data.csv'],
+    op_args=['/opt/airflow/dags/mini-project/output/aapl_data.csv',
+    '/opt/airflow/dags/mini-project/output/tsla_data.csv'],
     provide_context=True,
     dag=dag_yahoo_finance
 )
