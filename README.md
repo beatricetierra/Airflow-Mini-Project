@@ -5,6 +5,18 @@ data from Yahoo Finance on AAPL and TSLA. The current script downloads the data 
 and then computes the average price of each stock for the current date. This pipeline is scheduled to run
 every weekday at 6:00 pm with maximum retries of 2 at 5 minute intervals. 
 
+## Tasks in DAG
+0. Creates temporary directory to store downloaded files from Yahoo Finance.
+1. Downloads AAPL data.
+2. Downloads TSLA data.
+3. Move AAPL data to location query (task 5) will target.
+4. Move TSLA data to location query (task 5) will target.
+5. Query on market data. Currently takes average price from low, high, open, close, and close_adj prices and stores computed average in History.csv. 
+
+![alt text](https://github.com/beatricetierra/Airflow-Mini-Project/blob/main/DAG_graphical_view.PNG)
+
+**Fig 1. Graphical View of DAG tasks**
+
 ## Set Up Procedure
 1. Install Apache Airflow. 
     - For this project, Airflow was used with Docker. 
