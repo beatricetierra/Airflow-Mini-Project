@@ -27,16 +27,16 @@ def query_data(*args):
         df = pd.read_csv(filepath, header=None)
         timestamp = df[0]
         avg_price = (df[1]+df[2]+df[3]+df[4]+df[5])/5
-        result = pd.DataFrame(data={'File': file, 'Timestamp':[timestamp], 'Avg Price':[avg_price]})
-        print(result.head())
+        result = [file, timestamp, avg_price]
+        print(result)
 
 default_args = {
     'owner': 'airflow',
     'depends_on_past': True,
-    #'retries': 2,
-    #'retry_delay': timedelta(minutes=5),
-    'start_date': datetime.now() - timedelta(days=1)
-    #, 'schedule_interval': '20 2 * * 1-5'
+    'retries': 2,
+    'retry_delay': timedelta(minutes=5),
+    'start_date': datetime.now() - timedelta(days=1), 
+    'schedule_interval': '20 2 * * 1-5'
 }
 
 dag_yahoo_finance = DAG(
