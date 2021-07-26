@@ -17,6 +17,19 @@ every weekday at 6:00 pm with maximum retries of 2 at 5 minute intervals.
 
 **Fig 1. Graphical View of DAG tasks**
 
+**[UPDATE 7/22/2021]**
+
+After experiencing permission issues to move files in step 3 and 4, the following tasks were used:
+
+0. Creates temporary directory to store downloaded files from Yahoo Finance. (Accesible using airflow user) 
+1. Downloads AAPL data.
+2. Downloads TSLA data.
+3. Query on market data. Prints the stock ticket, timestamp, and the average price of the stock price (average of low, high, open, close, and close_adj prices). 
+
+![alt text](https://github.com/beatricetierra/Airflow-Mini-Project/blob/main/DAG_graphical_view2.PNG)
+
+**Fig 2. Updated Graphical View of DAG tasks**
+
 ## Set Up Procedure
 1. Install Apache Airflow. 
     - For this project, Airflow was used with Docker. 
